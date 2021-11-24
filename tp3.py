@@ -9,14 +9,14 @@ def find_template(img, template, threshold=0.8):
 
     #Find the template
     res = cv2.matchTemplate(img_gray, template_gray, cv2.TM_CCOEFF_NORMED)
-    loc = np.where(res >= threshold)
+    # loc = np.where(res >= threshold)
 
     #Find the center of the template
-    # x = int(np.mean(loc[1]))
-    # y = int(np.mean(loc[0]))
-    print(loc)
-    x=100
-    y=200
+    x = int(np.mean(res[1]))
+    y = int(np.mean(res[0]))
+    print(res)
+    # x=100
+    # y=200
 
     #Find the angle of the template
     # angle = cv2.minAreaRect(loc)[-1]
@@ -28,9 +28,24 @@ def find_template(img, template, threshold=0.8):
 def add_overlay(img, template, x, y, angle):
     # Rotate the image
     img = rotate_image(img, angle)
+    
+    b,g,r,a = cv2.split(img)
+    overlay_color = cv2.merge((b,g,r))
+	
+	# Apply some simple filtering to remove edge noise
+    mask = cv2.medianBlur(a,5)
 
-    # Add the image to the template	
-    template[y:y+img.shape[0], x:x+img.shape[1]] = img
+    h, w, _ = overlay_color.shape
+    roi = template[y:y+h, x:x+w]
+
+	# Black-out the area behind the logo in our original ROI
+    img1_bg = cv2.bitwise_and(roi.copy(),roi.copy(),mask = cv2.bitwise_not(mask))
+	
+	# Mask out the logo from the logo image.
+    img2_fg = cv2.bitwise_and(overlay_color,overlay_color,mask = mask)
+
+	# Update the original image with our new ROI
+    template[y:y+h, x:x+w] = cv2.add(img1_bg, img2_fg)
 
     return template
 
@@ -42,7 +57,7 @@ def rotate_image(image, angle):
     return result
 
 def main():
-    img = cv2.imread('frag_eroded/frag_eroded_0.png')
+    img = cv2.imread('frag_eroded/frag_eroded_2.png',cv2.IMREAD_UNCHANGED)
     template = cv2.imread('Michelangelo_ThecreationofAdam_1707x775.jpg')
     x, y, angle = find_template(img, template)
     overlay = add_overlay(img, template, x, y, angle)
