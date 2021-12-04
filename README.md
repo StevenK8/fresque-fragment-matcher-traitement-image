@@ -1,7 +1,7 @@
 # fresque-fragment-matcher-traitement-image
 
 ## Michelangelo reconstruction
-[example1]: Michelangelo_reconstruction.png "Michelangelo reconstruction"
+![Michelangelo reconstruction](/Michelangelo_reconstruction.png)
 
 ## Domenichino reconstruction
-[example2]: Domenichino_reconstruction.png "Domenichino reconstruction"
+![Domenichino reconstruction](/Domenichino_reconstruction.png?raw=true)
